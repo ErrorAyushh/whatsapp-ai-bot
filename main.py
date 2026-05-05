@@ -14,7 +14,6 @@ client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
-# ---------- Database ----------
 
 def init_db():
     conn = sqlite3.connect("conversations.db")
@@ -59,7 +58,7 @@ def get_conversation_history(sender: str):
         history.append({"role": "assistant", "content": ai_msg})
     return history
 
-# ---------- AI ----------
+
 
 def get_ai_reply(sender: str, user_message: str) -> str:
     history = get_conversation_history(sender)
@@ -74,7 +73,7 @@ def get_ai_reply(sender: str, user_message: str) -> str:
     )
     return response.choices[0].message.content
 
-# ---------- Routes ----------
+
 
 @app.on_event("startup")
 def startup():
