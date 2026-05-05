@@ -138,7 +138,7 @@ Visit http://localhost:8000/dashboard to see:
 ## Built By
 
 Ayush - B.Tech AI/ML Student at VIPS Delhi
+
 GitHub: https://github.com/ErrorAyushh
-powershellgit add README.md
-git commit -m "Add README"
-git pushSonnet 4.6
+
+
