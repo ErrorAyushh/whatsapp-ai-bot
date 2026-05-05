@@ -109,20 +109,35 @@ https://your-ngrok-url.ngrok-free.app/webhook
 User sends WhatsApp message
 ↓
 Twilio receives it
+
 ↓
+
 Twilio sends POST request to /webhook
+
 ↓
+
 FastAPI processes the message
+
 ↓
+
 Last 5 messages loaded from SQLite (memory)
+
 ↓
+
 Groq LLM generates a reply
+
 ↓
+
 Reply saved to SQLite
+
 ↓
+
 TwiML response sent back to Twilio
+
 ↓
+
 User receives AI reply on WhatsApp
+
 
 ---
 
