@@ -30,11 +30,17 @@ A WhatsApp chatbot powered by Groq LLM (Llama 3.3) and built with FastAPI. It re
 
 ## Project Structure
 whatsapp-ai-bot/
+
 ├── main.py
+
 ├── requirements.txt
+
 ├── .env.example
+
 ├── .gitignore
+
 └── templates/
+
 └── dashboard.html
 
 ---
