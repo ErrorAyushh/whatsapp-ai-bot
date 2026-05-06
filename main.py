@@ -1,6 +1,5 @@
 from fastapi import FastAPI, Request, Form
 from fastapi.responses import Response, HTMLResponse
-from fastapi.templating import Jinja2Templates
 from dotenv import load_dotenv
 from groq import Groq
 from typing import Optional
@@ -12,8 +11,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 app = FastAPI()
-templates = Jinja2Templates(directory="templates")
 
+# ---------- Database ----------
 
 def init_db():
     conn = sqlite3.connect("conversations.db")
@@ -58,7 +57,7 @@ def get_conversation_history(sender: str):
         history.append({"role": "assistant", "content": ai_msg})
     return history
 
-
+# ---------- AI ----------
 
 def get_ai_reply(sender: str, user_message: str) -> str:
     history = get_conversation_history(sender)
@@ -73,12 +72,12 @@ def get_ai_reply(sender: str, user_message: str) -> str:
     )
     return response.choices[0].message.content
 
-
+# ---------- Routes ----------
 
 @app.on_event("startup")
 def startup():
     init_db()
-    logger.info("Database initialized")
+    logger.info("Database initialized successfully")
 
 @app.get("/")
 def root():
@@ -147,12 +146,47 @@ def dashboard(request: Request):
         for row in rows
     ]
 
-    return templates.TemplateResponse(
-        request=request,
-        name="dashboard.html",
-        context={
-            "logs": logs,
-            "total": len(logs),
-            "unique_senders": len(set(l["sender"] for l in logs))
-        }
-    )
+    unique_senders = len(set(log["sender"] for log in logs))
+
+    rows_html = ""
+    for log in logs:
+        rows_html += f"""
+        <div class="conversation">
+            <div class="sender">From: {log['sender']}</div>
+            <div class="timestamp">{log['timestamp']}</div>
+            <div class="message-box user"><b>User:</b> {log['user_message']}</div>
+            <div class="message-box ai"><b>AI:</b> {log['ai_reply']}</div>
+        </div>
+        """
+
+    html = f"""<!DOCTYPE html>
+<html>
+<head>
+    <title>WhatsApp AI Bot Dashboard</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; background: #f0f2f5; padding: 20px; }}
+        h1 {{ color: #25D366; text-align: center; }}
+        .stats {{ display: flex; gap: 20px; justify-content: center; margin: 20px 0; }}
+        .stat-card {{ background: white; padding: 20px 40px; border-radius: 10px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }}
+        .stat-card h2 {{ font-size: 2rem; color: #25D366; }}
+        .conversation {{ background: white; border-radius: 10px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }}
+        .sender {{ font-weight: bold; color: #25D366; margin-bottom: 5px; }}
+        .timestamp {{ font-size: 0.8rem; color: #999; margin-bottom: 10px; }}
+        .message-box {{ padding: 10px; border-radius: 8px; margin-bottom: 8px; background: #f0f2f5; }}
+        .user {{ border-left: 4px solid #25D366; }}
+        .ai {{ border-left: 4px solid #075E54; }}
+        button {{ display: block; margin: 0 auto 20px; padding: 10px 30px; background: #25D366; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem; }}
+    </style>
+</head>
+<body>
+    <h1>WhatsApp AI Bot Dashboard</h1>
+    <div class="stats">
+        <div class="stat-card"><h2>{len(logs)}</h2><p>Total Messages</p></div>
+        <div class="stat-card"><h2>{unique_senders}</h2><p>Unique Users</p></div>
+    </div>
+    <button onclick="location.reload()">Refresh</button>
+    {rows_html}
+</body>
+</html>"""
+
+    return HTMLResponse(content=html)
